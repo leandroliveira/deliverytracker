@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: delivery-tracker
+  
+  datasource:
+    url: jdbc:postgresql://db.${PROJECT_ID}.supabase.co:5432/postgres
+    username: postgres
+    password: 3251@GoatDelivery
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://${PROJECT_ID}.supabase.co/auth/v1
+          jwk-set-uri: https://${PROJECT_ID}.supabase.co/auth/v1/.well-known/jwks.json
