@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://db.${PROJECT_ID}.supabase.co:5432/postgres
     username: postgres
-    password: 3251@GoatDelivery
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 3
