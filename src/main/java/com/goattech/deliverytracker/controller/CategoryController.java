@@ -1,10 +1,12 @@
 package com.goattech.deliverytracker.controller;
 
-import com.goattech.deliverytracker.model.Category;
+import com.goattech.deliverytracker.model.dto.CategoryDto;
 import com.goattech.deliverytracker.service.CategoryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,26 +22,31 @@ public class CategoryController {
     }
 
     @GetMapping
-    public List<Category> getCategories(@RequestParam String type) {
+    public List<CategoryDto> getCategories(@AuthenticationPrincipal Jwt jwt,
+            @RequestParam(required = false) String type) {
+        if (!StringUtils.hasText(type)) {
+            type = "EXPENSE"; // Default type if not provided
+        }
         return categoryService.getCategories(type);
     }
 
     @PostMapping
-    public Category createCategory(@RequestBody Category category, @AuthenticationPrincipal Jwt jwt) {
+    public CategoryDto createCategory(@AuthenticationPrincipal Jwt jwt, @RequestBody CategoryDto dto) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return categoryService.createCategory(category, userId);
+        return categoryService.createCategory(dto, userId);
     }
 
     @PutMapping("/{id}")
-    public Category updateCategory(@PathVariable UUID id, @RequestBody Category category,
-            @AuthenticationPrincipal Jwt jwt) {
+    public CategoryDto updateCategory(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id,
+            @RequestBody CategoryDto dto) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        return categoryService.updateCategory(id, category, userId);
+        return categoryService.updateCategory(id, dto, userId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Void> deleteCategory(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
         UUID userId = UUID.fromString(jwt.getSubject());
         categoryService.deleteCategory(id, userId);
+        return ResponseEntity.noContent().build();
     }
 }
