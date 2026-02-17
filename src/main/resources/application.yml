@@ -5,7 +5,7 @@ spring:
     name: delivery-tracker
   
   datasource:
-    url: jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:6543/postgres
+    url: jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:6543/postgres?prepareThreshold=0
     username: postgres.${PROJECT_ID}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
