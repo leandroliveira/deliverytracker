@@ -16,7 +16,7 @@ public class Category {
     private String name;
 
     @Column(nullable = false)
-    private String type; // EXPENSE or FIXED_EXPENSE
+    private String type; // VARIABLE or FIXED
 
     @Column(name = "user_id")
     private UUID userId;

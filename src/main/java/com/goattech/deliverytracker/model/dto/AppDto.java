@@ -3,7 +3,7 @@ package com.goattech.deliverytracker.model.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public record DeliveryAppDto(
+public record AppDto(
         UUID id,
         String name,
         Boolean active,

@@ -5,8 +5,8 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "delivery_apps")
-public class DeliveryApp {
+@Table(name = "apps")
+public class App {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,7 +24,7 @@ public class DeliveryApp {
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
-    public DeliveryApp() {
+    public App() {
     }
 
     @PrePersist
