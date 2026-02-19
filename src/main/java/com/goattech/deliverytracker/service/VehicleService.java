@@ -30,6 +30,10 @@ public class VehicleService {
     public VehicleDto createVehicle(VehicleDto dto, UUID userId) {
         validateDuplicity(dto, userId, null);
 
+        if (dto.isDefault() != null && dto.isDefault()) {
+            handleDefaultVehicle(userId);
+        }
+
         Vehicle vehicle = new Vehicle();
         updateEntityFromDto(vehicle, dto);
         vehicle.setUserId(userId);
@@ -47,9 +51,22 @@ public class VehicleService {
         }
 
         validateDuplicity(dto, userId, id);
+
+        if (dto.isDefault() != null && dto.isDefault()) {
+            handleDefaultVehicle(userId);
+        }
+
         updateEntityFromDto(vehicle, dto);
 
         return toDto(vehicleRepository.save(vehicle));
+    }
+
+    private void handleDefaultVehicle(UUID userId) {
+        vehicleRepository.findByUserIdAndIsDefaultTrue(userId)
+                .ifPresent(v -> {
+                    v.setDefault(false);
+                    vehicleRepository.save(v);
+                });
     }
 
     @Transactional
