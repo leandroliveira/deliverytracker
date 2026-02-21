@@ -32,6 +32,9 @@ public class FixedExpense {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column
+    private String description;
+
     @Column(name = "is_active")
     private Boolean isActive = true;
 
@@ -105,6 +108,14 @@ public class FixedExpense {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Boolean getActive() {

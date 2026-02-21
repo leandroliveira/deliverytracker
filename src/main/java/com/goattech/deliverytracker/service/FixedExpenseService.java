@@ -2,8 +2,10 @@ package com.goattech.deliverytracker.service;
 
 import com.goattech.deliverytracker.exception.BusinessException;
 import com.goattech.deliverytracker.model.FixedExpense;
+import com.goattech.deliverytracker.model.Vehicle;
 import com.goattech.deliverytracker.model.dto.FixedExpenseDto;
 import com.goattech.deliverytracker.repository.FixedExpenseRepository;
+import com.goattech.deliverytracker.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 public class FixedExpenseService {
 
     private final FixedExpenseRepository fixedExpenseRepository;
+    private final VehicleRepository vehicleRepository;
 
-    public FixedExpenseService(FixedExpenseRepository fixedExpenseRepository) {
+    public FixedExpenseService(FixedExpenseRepository fixedExpenseRepository, VehicleRepository vehicleRepository) {
         this.fixedExpenseRepository = fixedExpenseRepository;
+        this.vehicleRepository = vehicleRepository;
     }
 
     public List<FixedExpenseDto> getFixedExpensesForUser(UUID userId) {
@@ -28,9 +32,14 @@ public class FixedExpenseService {
 
     @Transactional
     public FixedExpenseDto createFixedExpense(FixedExpenseDto dto, UUID userId) {
+        validateDuplicity(dto, userId, null);
+
         FixedExpense expense = new FixedExpense();
         updateEntityFromDto(expense, dto);
         expense.setUserId(userId);
+
+        populateVehicleDescription(expense, dto);
+
         return toDto(fixedExpenseRepository.save(expense));
     }
 
@@ -43,7 +52,11 @@ public class FixedExpenseService {
             throw new BusinessException("Access denied");
         }
 
+        validateDuplicity(dto, userId, id);
         updateEntityFromDto(expense, dto);
+
+        populateVehicleDescription(expense, dto);
+
         return toDto(fixedExpenseRepository.save(expense));
     }
 
@@ -75,14 +88,37 @@ public class FixedExpenseService {
         if (dto.endDate() != null) {
             entity.setEndDate(dto.endDate());
         }
+        if (dto.description() != null) {
+            entity.setDescription(dto.description());
+        }
         if (dto.isActive() != null) {
             entity.setActive(dto.isActive());
+        }
+    }
+
+    private void validateDuplicity(FixedExpenseDto dto, UUID userId, UUID currentId) {
+        if (dto.vehicleId() != null && dto.categoryId() != null) {
+            fixedExpenseRepository.findByUserIdAndCategoryIdAndVehicleId(userId, dto.categoryId(), dto.vehicleId())
+                    .ifPresent(expense -> {
+                        if (currentId == null || !expense.getId().equals(currentId)) {
+                            throw new BusinessException("This vehicle already has a fixed expense for this category");
+                        }
+                    });
+        }
+    }
+
+    private void populateVehicleDescription(FixedExpense entity, FixedExpenseDto dto) {
+        if (dto.vehicleId() != null && (dto.description() == null || dto.description().isBlank())) {
+            Vehicle vehicle = vehicleRepository.findById(dto.vehicleId())
+                    .orElseThrow(() -> new BusinessException("Vehicle not found"));
+            entity.setDescription(vehicle.getName());
         }
     }
 
     private FixedExpenseDto toDto(FixedExpense entity) {
         return new FixedExpenseDto(
                 entity.getId(),
+                entity.getDescription(),
                 entity.getCategoryId(),
                 entity.getVehicleId(),
                 entity.getAmount(),
